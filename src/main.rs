@@ -10,12 +10,14 @@ pub type pVirtualAlloc = unsafe extern "system" fn(
 ) -> *mut c_void;
 
 fn main() {
-    let lib = Library::new("kernel32.dll").expect("Couldn't load the kernel32.dll");
+    let lib = unsafe {
+        Library::new("kernel32.dll").expect("Couldn't load the kernel32.dll")
+    };
 
-    let virtual_alloc: Symbol<VirtualAllocFn> = unsafe {
-        lib.get(b"VirtualAlloc\0").expect("Couldn't find the address of VirtualAlloc");
+    let virtual_alloc: Symbol<pVirtualAlloc> = unsafe {
+        lib.get(b"VirtualAlloc\0").expect("Couldn't find the address of VirtualAlloc")
 
-    }
+    };
     let size: usize = 1024;
 
     let return_address = unsafe {
@@ -31,7 +33,7 @@ fn main() {
         println!("Allocation failed");
     }
     else{
-        println!("Allocation succeeded. The address allocated: {}", return_address);
+        println!("Allocation succeeded. The address allocated: {:?}", return_address);
     }
 
 }
